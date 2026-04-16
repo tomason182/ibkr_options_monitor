@@ -3,9 +3,6 @@ from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
 from datetime import datetime, timedelta
 from decimal import Decimal
-import warnings
-
-warnings.filterwarnings("ignore")
 
 
 class IbkrClient(EClient, EWrapper):
@@ -18,7 +15,7 @@ class IbkrClient(EClient, EWrapper):
 
         # Posiciones
         self.positions = []
-        self.position_done = False
+        self.positions_done = False
 
     # Manejar errores
     def error(

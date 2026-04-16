@@ -15,7 +15,13 @@ class TkinterApp:
     # ------------------------------------------
     def setup_ui(self):
         # Boton conectar
-        btn_connect = tk.Button(self.root, text="Connect", command=self.service.connect)
+        btn_connect = tk.Button(
+            self.root,
+            text="Connect",
+            command=lambda: threading.Thread(
+                target=self.service.connect, daemon=True
+            ).start(),
+        )
         btn_connect.pack()
 
         # Boton posiciones

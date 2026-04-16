@@ -6,5 +6,5 @@ class Position:
         self.quantity = quantity
         self.avg_cost = avg_cost
 
-        def __repr__(self):
-            return f"<Position {self.symbol} {self.quantity} @ {avg_cost}>"
+    def __repr__(self):
+        return f"<Position {self.symbol} {self.quantity} @ {self.avg_cost}>"
