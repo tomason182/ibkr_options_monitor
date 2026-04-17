@@ -1,23 +1,29 @@
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
-from datetime import datetime, timedelta
 from decimal import Decimal
+from queue import Queue
 
 
 class IbkrClient(EClient, EWrapper):
     def __init__(self):
-        EClient.__init__(self, self)
+        super().__init__(self)
 
         # Estado interno
-        self.connected_flag = False
+        self.is_connected = False
         self.next_order_id = None
 
         # Posiciones
         self.positions = []
         self.positions_done = False
 
-    # Manejar errores
+        # Errores
+        self.error_queue = Queue()
+
+    # -----------------------------------
+    # Errores
+    # -----------------------------------
+
     def error(
         self,
         reqId,
@@ -28,16 +34,21 @@ class IbkrClient(EClient, EWrapper):
     ):
         if errorCode == 2176 and "fractional share" in errorString.lower():
             return
-        print(f"Error {errorCode}:{errorString}")
 
-    # Para abrir posiciones usando la api debemos considerar nextValidId para que no se dupliquen los id de los trades
-    # Por el momento la app no va a abrir posiciones desde la UI por lo tanto la vamos a usar para cambiar el estado de connected_flag
+        msg = f"Error {errorCode}: {errorString}"
+        self.error_queue.put(msg)
+
+    # --------------------------------------
+    # Connection
+    # --------------------------------------
+
     def nextValidId(self, orderId: int):
         self.next_order_id = orderId
-        self.connected_flag = True
-        print("Connected to IBTWS")
+        self.is_connected = True
 
-    # Position callback (cada vez que se inicia la app, el servidor tws devuelve las posiciones
+    # ------------------------------------------
+    # Positions
+    # ------------------------------------------
     def position(
         self, account: str, contract: Contract, position: Decimal, avgCost: float
     ):
@@ -52,5 +63,5 @@ class IbkrClient(EClient, EWrapper):
         )
 
     def positionEnd(self):
-        self.position_done = True
+        self.positions_done = True
         print("Positions received")

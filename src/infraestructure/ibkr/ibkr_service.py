@@ -12,6 +12,10 @@ class IbkrService:
     def connect(self, host="127.0.0.1", port=7497, client_id=1):
         if self.client.is_connected:
             return
+
+        if self.thread and self.thread.is_alive:
+            return
+
         # Intentamos conectar a la api de ibkr
         self.client.connect(host, port, client_id)
 
@@ -22,12 +26,15 @@ class IbkrService:
 
         # Esperar la coneccion
         while not self.client.is_connected:
-            if time.time() - start > 5:
-                raise TimeoutError("IBKR cound not connect. Timeout")
+            if time.time() - start > 5
+                raise TimeoutError("IBKR could not connect. Timeout")
             time.sleep(0.1)
 
     def disconnect(self):
-        self.client.disconnect()
+        if self.client.is_connected:
+            self.client.disconnect()
+            self.client.is_connected = False
+
 
     # ----------------------------------------
     # Posiciones (sync wrapper)
@@ -35,7 +42,7 @@ class IbkrService:
     def get_positions(self):
         # Chequear que api esta conectada
         if not self.client.is_connected:
-            raise Exception("Not Connected to IBKR")
+            raise ConnectionError("Not Connected to IBKR")
         # Reset estado
         self.client.positions = []
         self.client.positions_done = False
