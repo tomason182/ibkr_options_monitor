@@ -12,22 +12,7 @@ class TkinterApp:
         #self.style = ttk.Style()
         self.root.title("Option Monitor App")
 
-        # Variables globales
-        #self.style.configure("Custom.Title", foreground=self.text_color, font=("Arial", 18, "bold"))
-        #self.style.configure("subtile", foreground=self.text_color, font=("Arial", 14, "bold"))
-        
-        #self.style.configure("font_body", fg=self.text_color, font=("Arial", 12))
-        #self.style.configure("font_body_bold", fg=self.text_color, font=("Arial", 12, "bold"))
-        
-        #self.font_small = ("Arial", 10)
-        #self.font_bottom = ("Arial", 11, "bold")
-        #self.font_error = ("Arial", 12, "bold")
-        #self.font_success = ("Arial", 12, "bold")
-
-        #self.color_error = "red"
-        #self.text_color = "black"
-        #self.success = "green"
-        #self.color_mute = "gray"
+        self.positions = [] 
 
         self.setup_ui()
 
@@ -40,14 +25,17 @@ class TkinterApp:
     def disconnect_terminal(self):
         threading.Thread(target=self.disconnect_service, daemon=True).start()
 
-    def fetch_positions(self):
-        threading.Thread(target=self.render_positions, daemon=True).start()
+    def refresh_positions(self):
+        threading.Thread(target=self.fetch_positions, daemon=True).start()
 
     ##Servicios
     # Conectar | desconectar servicio
     def connect_service(self):
         try:
+            # Conectamos a ibkr
             self.service.connect()
+            # Obtenemos las posiciones
+            self.positions = self.service.get_positions()
             self.root.after(0, lambda: self.show_message("Connected to TWS"))
         except Exception as e:
             self.root.after(0, lambda err=e: self.show_error(str(err)))
@@ -59,28 +47,20 @@ class TkinterApp:
         except Exception as e:
             self.root.after(0, lambda err=e: self.show_error(str(err)))
 
-    def render_positions(self):
+    def fetch_positions(self):
         try:
-            positions = (
-                self.service.get_positions()
-            )  #! Positions deberia tener un tipo.
-            self.root.after(0, lambda: self.display_positions(positions))
+            self.positions = self.service.get_positions()
+            self.root.after(0, lambda: self.show_message("Positions refreshed"))
         except Exception as e:
             self.root.after(0, lambda err=e: self.show_error(str(err)))
 
-    ##Render
-    # ---------------------------------------------
-    def display_positions(self, positions: List[Position]):
-        print("Positions")
-        for p in positions:
-            print(p)
-
+    
     ## Helpers functions
     def show_message(self, msg):
         self.status_label.config(text=msg)
 
     def show_error(self, msg):
-        self.status_label.config(text=msg)
+        self.status_label.config(text=msg, foreground="red")
         print("Error: ", msg)
 
     # ------------------------------------------
@@ -90,7 +70,7 @@ class TkinterApp:
 
         ## Main frame
         main_frame = ttk.Frame(self.root, padding="15")
-        main_frame.grid(row=0, column=0, sticky="wens")
+        main_frame.grid(row=0, column=0, sticky="nsew")
         
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
@@ -131,12 +111,12 @@ class TkinterApp:
 
         btn_connect.pack(side="left", padx=(0,10))
 
-        btn_disconnect = ttk.Button(btn_frame, text="Disconnect", command=self.disconnect_terminal, state="disable")
+        btn_disconnect = ttk.Button(btn_frame, text="Disconnect", command=self.disconnect_terminal, state="disabled")
         btn_disconnect.pack(side="left")
 
                 # Refresh positions
         btn_refresh = ttk.Button(
-            btn_frame, text="Refresh Positions", command=self.fetch_positions
+            btn_frame, text="Refresh Positions", command=self.refresh_positions
         )
 
         btn_refresh.pack(side="left", padx=(10,0))
@@ -149,7 +129,7 @@ class TkinterApp:
     def setup_positions_section(self, parent, row):
         # Monitor
         monitor_frame = ttk.LabelFrame(parent, text="Options Monitor", padding="10")
-        monitor_frame.grid(row=row, column=0, sticky=("nwe"), pady=(15))
+        monitor_frame.grid(row=row, column=0, sticky=("nswe"), pady=(15, 0))
         monitor_frame.columnconfigure(0, weight=1)
 
 
@@ -174,7 +154,7 @@ class TkinterApp:
 
 
 
-        table.pack()
+        table.grid(row=0, column=0, sticky="nsew")
 
 
 
