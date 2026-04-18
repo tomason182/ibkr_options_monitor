@@ -26,7 +26,7 @@ class IbkrService:
 
         # Esperar la coneccion
         while not self.client.is_connected:
-            if time.time() - start > 5
+            if time.time() - start > 5:
                 raise TimeoutError("IBKR could not connect. Timeout")
             time.sleep(0.1)
 
