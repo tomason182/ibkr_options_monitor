@@ -35,7 +35,7 @@ class IbkrService:
     def disconnect(self):
         if self.client.is_connected:
             self.client.disconnect()
-            self.thread = None
+            self.thread = None  # Necesario resetear el threat
             self.client.is_connected = False
             print(f"Disconnected state: {self.client.is_connected}")
 
@@ -60,11 +60,14 @@ class IbkrService:
                 raise TimeoutError("IBKR positions timeout")
             time.sleep(0.1)
 
+        print("Positions:", self.client.positions)
+
         return [
             Position(
                 con_id=p["conId"],
                 symbol=p["symbol"],
                 sec_type=p["secType"],
+                strike=p["strike"],
                 quantity=p["position"],
                 avg_cost=p["avgCost"],
             )

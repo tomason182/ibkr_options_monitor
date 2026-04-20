@@ -57,6 +57,7 @@ class IbkrClient(EClient, EWrapper):
                 "conId": contract.conId,
                 "symbol": contract.symbol,
                 "secType": contract.secType,
+                "strike": contract.strike,
                 "position": Decimal(position),
                 "avgCost": float(avgCost),
             }

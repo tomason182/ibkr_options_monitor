@@ -1,8 +1,9 @@
 class Position:
-    def __init__(self, con_id, symbol, sec_type, quantity, avg_cost):
+    def __init__(self, con_id, symbol, sec_type, strike, quantity, avg_cost):
         self.id = con_id
         self.symbol = symbol
         self.sec_type = sec_type
+        self.strike = strike
         self.quantity = quantity
         self.avg_cost = avg_cost
 
