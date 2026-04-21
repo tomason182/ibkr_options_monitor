@@ -1,3 +1,4 @@
+from decimal import Decimal
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
@@ -52,10 +53,44 @@ class TkinterApp:
     def fetch_positions(self):
         try:
             self.positions = self.service.get_positions()
-            self.root.after(0, lambda: self.show_message("Positions refreshed"))
-            print(self.positions)
+            self.root.after(0, lambda: self.update_ui())
         except Exception as e:
             self.root.after(0, lambda err=e: self.show_error(str(err)))
+
+    def update_ui(self):
+        self.show_message("Positions refreshed")
+        self.fill_table(self.positions)
+
+    def fill_table(self, positions: List):
+        for p in positions:
+
+            margen = 1000
+            multiplier = getattr(p, "multiplier", 100)
+            totalCost = p.avg_cost * float(multiplier)  # aqui es Price * 100 + fee
+            last = 0  # Se toma de otra funcion de ibkr api
+            delta = 0  #
+            market_value = last * multiplier * p.position
+            cost_basis = p.avg_cost * multiplier * p.position
+            net_credit = totalCost * p.position
+            pnl = market_value - cost_basis
+            pnl_pct = pnl / abs(cost_basis) * 100
+            max_loss = margen - net_credit
+            self.table.insert(
+                "",
+                "end",
+                values=(
+                    p.id,
+                    p.symbol,
+                    p.strike,
+                    p.position,
+                    p.avg_cost,
+                    last,
+                    delta,
+                    pnl_pct,
+                    net_credit,
+                    max_loss,
+                ),
+            )
 
     ## Helpers functions
     def show_message(self, msg):
@@ -139,36 +174,42 @@ class TkinterApp:
         ## Tabla de posiciones
         columns = (
             "id",
-            "description",
-            "type",
+            "symbol",
             "strike",
             "position",
-            "price",
-            "total",
+            "avg_cost",
             "last",
             "delta",
-            "%_p_l_trade",
+            "p_l_trade",
             "net_credit",
             "max_loss",
         )
-        table = ttk.Treeview(monitor_frame, columns=columns, show="headings")
+        self.table = ttk.Treeview(monitor_frame, columns=columns, show="headings")
 
+        # id
+        # symbol
+        # strike
+        # position
+        # avgCost
+        # last
+        # delta
+        # p_l_trade
+        # net_credit
+        # max_loss
         # titulos columnas
-        table.heading("id", text="id")
-        table.heading("description", text="Description")
-        table.heading("type", text="Type")
-        table.heading("strike", text="Strike")
-        table.heading("position", text="Position")
-        table.heading("price", text="Price")
-        table.heading("total", text="Total")  # total = price * 100 + fee
-        table.heading("last", text="Last")
-        table.heading("delta", text="Delta")
-        table.heading("%_p_l_trade", text="P/L x trade")
-        table.heading("net_credit", text="Net cretid")
-        table.heading("max_loss", text="Max loss")
+        self.table.heading("id", text="id")
+        self.table.heading("symbol", text="Symbol")
+        self.table.heading("strike", text="Strike")
+        self.table.heading("position", text="Position")
+        self.table.heading("avg_cost", text="avgCost")
+        self.table.heading("last", text="Last")
+        self.table.heading("delta", text="Delta")
+        self.table.heading("p_l_trade", text="P/L x trade")
+        self.table.heading("net_credit", text="Net cretid")
+        self.table.heading("max_loss", text="Max loss")
         # Insertar datos
 
-        table.grid(row=0, column=0, sticky="nsew")
+        self.table.grid(row=0, column=0, sticky="nsew")
 
     # ----------------------------------------------
     # Run the app

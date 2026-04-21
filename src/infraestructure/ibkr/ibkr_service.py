@@ -10,7 +10,6 @@ class IbkrService:
 
     # Connection
     def connect(self, host="127.0.0.1", port=7496, client_id=1):
-        print(self.client.is_connected)
         if self.client.is_connected:
             return
 
@@ -30,14 +29,12 @@ class IbkrService:
             if time.time() - start > 5:
                 raise TimeoutError("IBKR could not connect. Timeout")
             time.sleep(0.1)
-        print(f"state after: {self.client.is_connected}")
 
     def disconnect(self):
         if self.client.is_connected:
             self.client.disconnect()
             self.thread = None  # Necesario resetear el threat
             self.client.is_connected = False
-            print(f"Disconnected state: {self.client.is_connected}")
 
     # ----------------------------------------
     # Posiciones (sync wrapper)
@@ -68,7 +65,7 @@ class IbkrService:
                 symbol=p["symbol"],
                 sec_type=p["secType"],
                 strike=p["strike"],
-                quantity=p["position"],
+                position=p["position"],
                 avg_cost=p["avgCost"],
             )
             for p in self.client.positions

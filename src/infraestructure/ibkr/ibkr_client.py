@@ -49,16 +49,20 @@ class IbkrClient(EClient, EWrapper):
     # ------------------------------------------
     # Positions
     # ------------------------------------------
-    def position(
-        self, account: str, contract: Contract, position: Decimal, avgCost: float
-    ):
+    def position(self, account: str, contract: Contract, position, avgCost: float):
         self.positions.append(
             {
                 "conId": contract.conId,
                 "symbol": contract.symbol,
                 "secType": contract.secType,
+                "rigth": contract.right,
+                "multiplier": contract.multiplier,
+                "currency": contract.currency,
+                "localSymbol": contract.localSymbol,
+                "tradingClass": contract.tradingClass,
+                "lastTradeDateOrContractMonth": contract.lastTradeDateOrContractMonth,
                 "strike": contract.strike,
-                "position": Decimal(position),
+                "position": float(position),
                 "avgCost": float(avgCost),
             }
         )
