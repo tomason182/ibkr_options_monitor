@@ -1,7 +1,9 @@
-from ibapi.client import EClient, ExecutionFilter
+from ibapi import commission_and_fees_report
+from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
-from ibapi.execution import Execution
+from ibapi.execution import Execution, ExecutionFilter
+from ibapi.commission_and_fees_report import CommissionAndFeesReport
 from queue import Queue
 from threading import Event
 
@@ -21,7 +23,9 @@ class IbkrClient(EClient, EWrapper):
 
         # Executions (cola de thread-safe)
         self.execution_queue = Queue()
-        self.exec_filter = ExecutionFilter()
+
+        # Commissions
+        self.commission_queue = Queue()
 
         # Errores
         self.error_queue = Queue()
@@ -65,7 +69,7 @@ class IbkrClient(EClient, EWrapper):
                 "conId": contract.conId,
                 "symbol": contract.symbol,
                 "secType": contract.secType,
-                "rigth": contract.right,
+                "right": contract.right,
                 "multiplier": contract.multiplier,
                 "currency": contract.currency,
                 "localSymbol": contract.localSymbol,
@@ -103,3 +107,23 @@ class IbkrClient(EClient, EWrapper):
 
     def execDetailsEnd(self, reqId: int):
         print("ExecDetailsEnd. ReqId: ", reqId)
+
+    def requestExecutions(self):
+        filter = ExecutionFilter()
+        filter.clientId = 0
+
+        self.reqExecutions(1, filter)
+
+    # ----------------------------------------
+    # Commissions
+    # ----------------------------------------
+    def commissionReport(self, commissionAndFeesReport: CommissionAndFeesReport):
+        print("Commission Received: ", commissionAndFeesReport.execId)
+
+        self.commission_queue.put(
+            {
+                "execId": commissionAndFeesReport.execId,
+                "commission": commissionAndFeesReport.commissionAndFees,
+                "currency": commissionAndFeesReport.currency,
+            }
+        )

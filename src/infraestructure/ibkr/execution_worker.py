@@ -6,18 +6,29 @@ class ExecutionWorker:
         self.client = client
         self.repo = repository
         self.running = False
+        self.thread = None
 
     def start(self):
+        if self.running:
+            return
+
         self.running = True
-        threading.Thread(target=self.run, daemon=True).start()
+        self.thread = threading.Thread(target=self.run, daemon=True)
+        self.thread.start()
+        print("ExecutionWorker started")
 
     def stop(self):
         self.running = False
+        print("ExecutionWroker stopped")
 
     def run(self):
         while self.running:
-            exec_data = self.client.execution_queue.get()
+            try:
+                exec_data = self.client.execution_queue.get()
 
-            if not self.repo.exists(exec_data["execId"]):
+                # Guardado directo con INSERT OR IGNORE
                 self.repo.save(exec_data)
                 print("Saved execution", exec_data["execID"])
+
+            except Exception as e:
+                print(f"Error processing executions: {str(e)}")

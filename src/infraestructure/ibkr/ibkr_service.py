@@ -25,6 +25,9 @@ class IbkrService:
         if not self.client.connected_event.wait(timeout=5):
             raise TimeoutError("Connection timeout")
 
+        # Solicitamos la execuciones
+        self.client.requestExecutions()
+
         print("Connected to tws")
 
     def disconnect(self):

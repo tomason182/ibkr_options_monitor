@@ -11,7 +11,9 @@ class SQLiteConnect:
     # Obtener conexion
     # --------------------------------------
     def get_conn(self):
-        os.makedirs(self.db_path, exist_ok=True)
+        dir_path = os.path.dirname(self.db_path)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
         return sqlite3.connect(self.db_path, check_same_thread=False)
 
     # ---------------------------------------
