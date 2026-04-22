@@ -1,21 +1,27 @@
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
-from decimal import Decimal
+from ibapi.execution import Execution
 from queue import Queue
+from threading import Event
 
 
 class IbkrClient(EClient, EWrapper):
     def __init__(self):
-        super().__init__(self)
+        EClient.__init__(self, self)
 
-        # Estado interno
+        ## Estados
+        # Conexion
         self.is_connected = False
-        self.next_order_id = None
+        self.connected_event = Event()
 
         # Posiciones
         self.positions = []
-        self.positions_done = False
+        self.positions_event = Event()
+
+        # Executions (cola de thread-safe)
+        self.execution_queue = Queue()
+        self.execution = Execution()
 
         # Errores
         self.error_queue = Queue()
@@ -43,8 +49,12 @@ class IbkrClient(EClient, EWrapper):
     # --------------------------------------
 
     def nextValidId(self, orderId: int):
-        self.next_order_id = orderId
         self.is_connected = True
+        self.connected_event.set()
+
+    def connectionClosed(self):
+        self.is_connected = False
+        self.connected_event.clear()
 
     # ------------------------------------------
     # Positions
@@ -70,3 +80,22 @@ class IbkrClient(EClient, EWrapper):
     def positionEnd(self):
         self.positions_done = True
         print("Positions received")
+
+    # ----------------------------------------
+    # Executions
+    # ----------------------------------------
+    def execDetails(self, reqId: int, contract: Contract, execution: Execution):
+        self.execution_queue.put(
+            {
+                "execId": execution.execId,
+                "conId": contract.conId,
+                "symbol": contract.symbol,
+                "secType": contract.secType,
+                "right": contract.right,
+                "strike": contract.strike,
+                "side": execution.side,
+                "qty": execution.shares,
+                "price": execution.price,
+                "time": execution.time,
+            }
+        )

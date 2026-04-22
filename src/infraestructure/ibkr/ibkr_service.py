@@ -22,22 +22,19 @@ class IbkrService:
         self.thread = threading.Thread(target=self.client.run, daemon=True)
         self.thread.start()
 
-        start = time.time()
+        if not self.client.connected_event.wait(timeout=5):
+            raise TimeoutError("Connection timeout")
 
-        # Esperar la coneccion
-        while not self.client.is_connected:
-            if time.time() - start > 5:
-                raise TimeoutError("IBKR could not connect. Timeout")
-            time.sleep(0.1)
+        print("Connected to tws")
 
     def disconnect(self):
         if self.client.is_connected:
             self.client.disconnect()
-            self.thread = None  # Necesario resetear el threat
             self.client.is_connected = False
+        self.thread = None
 
     # ----------------------------------------
-    # Posiciones (sync wrapper)
+    # Posiciones (event driven)
     # ----------------------------------------
     def get_positions(self):
         # Chequear que api esta conectada
@@ -45,19 +42,12 @@ class IbkrService:
             raise ConnectionError("Not Connected to IBKR")
         # Reset estado
         self.client.positions = []
-        self.client.positions_done = False
+        self.client.positions_event.clear()
 
         self.client.reqPositions()
 
-        start = time.time()
-
-        # Esperar respuesta
-        while not self.client.positions_done:
-            if time.time() - start > 5:
-                raise TimeoutError("IBKR positions timeout")
-            time.sleep(0.1)
-
-        print("Positions:", self.client.positions)
+        if not self.client.position_event.wait(timeout=5):
+            raise TimeoutError("Positions timeout")
 
         return [
             Position(
