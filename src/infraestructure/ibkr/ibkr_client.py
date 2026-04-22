@@ -1,4 +1,4 @@
-from ibapi.client import EClient
+from ibapi.client import EClient, ExecutionFilter
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
 from ibapi.execution import Execution
@@ -21,7 +21,7 @@ class IbkrClient(EClient, EWrapper):
 
         # Executions (cola de thread-safe)
         self.execution_queue = Queue()
-        self.execution = Execution()
+        self.exec_filter = ExecutionFilter()
 
         # Errores
         self.error_queue = Queue()
@@ -78,13 +78,14 @@ class IbkrClient(EClient, EWrapper):
         )
 
     def positionEnd(self):
-        self.positions_done = True
+        self.positions_event.set()
         print("Positions received")
 
     # ----------------------------------------
     # Executions
     # ----------------------------------------
     def execDetails(self, reqId: int, contract: Contract, execution: Execution):
+        print("execDetails trigger.")
         self.execution_queue.put(
             {
                 "execId": execution.execId,
@@ -99,3 +100,6 @@ class IbkrClient(EClient, EWrapper):
                 "time": execution.time,
             }
         )
+
+    def execDetailsEnd(self, reqId: int):
+        print("ExecDetailsEnd. ReqId: ", reqId)

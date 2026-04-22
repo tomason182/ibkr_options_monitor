@@ -46,7 +46,7 @@ class IbkrService:
 
         self.client.reqPositions()
 
-        if not self.client.position_event.wait(timeout=5):
+        if not self.client.positions_event.wait(timeout=5):
             raise TimeoutError("Positions timeout")
 
         return [
