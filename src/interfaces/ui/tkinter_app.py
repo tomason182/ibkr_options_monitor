@@ -12,6 +12,7 @@ class TkinterApp:
         self.root = tk.Tk()
         # self.style = ttk.Style()
         self.root.title("Option Monitor App")
+        self.root.geometry("800x600")
 
         self.positions = []
 
