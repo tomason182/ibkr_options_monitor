@@ -91,16 +91,18 @@ class IbkrClient(EClient, EWrapper):
         print("execDetails trigger.")
         self.execution_queue.put(
             {
-                "execId": execution.execId,
-                "conId": contract.conId,
+                "exec_id": execution.execId,
+                "con_id": contract.conId,
                 "symbol": contract.symbol,
-                "secType": contract.secType,
+                "sec_type": contract.secType,
                 "right": contract.right,
                 "strike": contract.strike,
                 "side": execution.side,
                 "qty": execution.shares,
                 "price": execution.price,
-                "time": execution.time,
+                "exec_time": execution.time,
+                "account": execution.acctNumber,
+                "exchange": execution.exchange,
             }
         )
 

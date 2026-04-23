@@ -12,10 +12,10 @@ db.create_tables()
 repo = ExecutionsRepositorySQL(db)
 
 client = IbkrClient()
-service = IbkrService(client)
+worker = ExecutionWorker(client, repo)
+service = IbkrService(client, worker)
 ui = TkinterApp(service)
 
-worker = ExecutionWorker(client, repo)
 
 worker.start()
 

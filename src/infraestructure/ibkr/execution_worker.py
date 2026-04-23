@@ -35,7 +35,7 @@ class ExecutionWorker:
 
                 # Guardado directo con INSERT OR IGNORE
                 self.repo.save(exec_data)
-                print("Saved execution", exec_data["execId"])
+                print("Saved execution", exec_data["exec_id"])
 
             except Empty:
                 continue

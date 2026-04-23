@@ -59,6 +59,7 @@ class ExecutionsRepositorySQL:
         with self.lock:
             conn = self.db.get_conn()
             try:
+                print(f"exec_id = {exec_data["exec_id"]}")
                 cursor = conn.cursor()
                 params = (
                     exec_data["exec_id"],
@@ -68,8 +69,8 @@ class ExecutionsRepositorySQL:
                     exec_data["right"],
                     exec_data["strike"],
                     exec_data["side"],
-                    exec_data["qty"],
-                    exec_data["price"],
+                    float(exec_data["qty"]),
+                    float(exec_data["price"]),
                     exec_data["exec_time"],
                     exec_data["account"],
                     exec_data["exchange"],
