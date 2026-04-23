@@ -110,6 +110,7 @@ class IbkrClient(EClient, EWrapper):
         print("ExecDetailsEnd. ReqId: ", reqId)
 
     def requestExecutions(self):
+        print("requestExecutions trigger")
         filter = ExecutionFilter()
         filter.clientId = 0
 

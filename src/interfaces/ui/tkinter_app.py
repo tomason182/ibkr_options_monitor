@@ -93,6 +93,10 @@ class TkinterApp:
                 ),
             )
 
+    # Solicitar ejecuciones
+    def fetch_executions(self):
+        self.service.requestExecutions()
+
     ## Helpers functions
     def show_message(self, msg):
         self.status_label.config(text=msg, foreground="green")

@@ -26,10 +26,6 @@ class IbkrService:
         if not self.client.connected_event.wait(timeout=5):
             raise TimeoutError("Connection timeout")
 
-        # Solicitamos la execuciones
-        # Consulta para Chat: ¿Aqui requestExecutions() no deberia ir en un thread?
-        self.client.requestExecutions()
-
         print("Connected to tws")
 
     def disconnect(self):
@@ -68,3 +64,14 @@ class IbkrService:
             )
             for p in self.client.positions
         ]
+
+    # ------------------------------------------
+    # Execuciones
+    # ------------------------------------------
+    def get_executions(self):
+        if not self.client.is_connected:
+            raise ConnectionError("Not connected to TWS api")
+
+        self.client.requestExecutions()
+
+        return
