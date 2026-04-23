@@ -12,6 +12,7 @@ class SQLiteConnect:
     # --------------------------------------
     def get_conn(self):
         dir_path = os.path.dirname(self.db_path)
+        print("Directorio raiz: ", dir_path)
         if dir_path:
             os.makedirs(dir_path, exist_ok=True)
         return sqlite3.connect(self.db_path, check_same_thread=False)
@@ -54,6 +55,7 @@ class ExecutionsRepositorySQL:
         self.lock = Lock()
 
     def save(self, exec_data):
+        # Chat: ¿que conseguimos hacer aqui con Lock?
         with self.lock:
             conn = self.db.get_conn()
             try:
@@ -75,7 +77,7 @@ class ExecutionsRepositorySQL:
 
                 query = """
                     INSERT OR IGNORE INTO executions (
-                        exec_id, con_id, symbol, sect_type, right, strike, side, qty, price, exec_time, account, exchange
+                        exec_id, con_id, symbol, sec_type, right, strike, side, qty, price, exec_time, account, exchange
                         ) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """
@@ -84,3 +86,7 @@ class ExecutionsRepositorySQL:
                 conn.commit()
             except Exception as e:
                 raise Exception(f"Error saving execution: {str(e)}")
+
+            # Chat: ¿Aca deberia ir finnally para hacer conn.close()
+            finally:
+                conn.close()

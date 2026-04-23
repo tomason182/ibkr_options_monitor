@@ -1,4 +1,3 @@
-from ibapi import commission_and_fees_report
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract

@@ -4,8 +4,9 @@ from src.core.models.position import Position
 
 
 class IbkrService:
-    def __init__(self, client):
+    def __init__(self, client, worker):
         self.client = client
+        self.worker = worker
         self.thread = None
 
     # Connection
@@ -26,21 +27,25 @@ class IbkrService:
             raise TimeoutError("Connection timeout")
 
         # Solicitamos la execuciones
+        # Consulta para Chat: ¿Aqui requestExecutions() no deberia ir en un thread?
         self.client.requestExecutions()
 
         print("Connected to tws")
 
     def disconnect(self):
+        # Pregunta para Chat: ¿aqui, al desconectar, deberiamos hacer self.theard.clear()?
         if self.client.is_connected:
             self.client.disconnect()
-            self.client.is_connected = False
+            self.worker.stop()
+
+        if self.thread:
+            self.thread.join(timeout=2)
         self.thread = None
 
     # ----------------------------------------
     # Posiciones (event driven)
     # ----------------------------------------
     def get_positions(self):
-        # Chequear que api esta conectada
         if not self.client.is_connected:
             raise ConnectionError("Not Connected to IBKR")
         # Reset estado

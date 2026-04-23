@@ -1,4 +1,6 @@
+from socket import timeout
 import threading
+from queue import Empty
 
 
 class ExecutionWorker:
@@ -19,16 +21,24 @@ class ExecutionWorker:
 
     def stop(self):
         self.running = False
+
+        if self.thread:
+            self.thread.join(timeout=2)
+
+        self.thread = None
         print("ExecutionWroker stopped")
 
     def run(self):
         while self.running:
             try:
-                exec_data = self.client.execution_queue.get()
+                exec_data = self.client.execution_queue.get(timeout=1)
 
                 # Guardado directo con INSERT OR IGNORE
                 self.repo.save(exec_data)
-                print("Saved execution", exec_data["execID"])
+                print("Saved execution", exec_data["execId"])
+
+            except Empty:
+                continue
 
             except Exception as e:
                 print(f"Error processing executions: {str(e)}")
